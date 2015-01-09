@@ -760,6 +760,32 @@ namespace EdotsWS
             return dt;
         }
         [WebMethod]
+        public Paciente[] ListadoPacientesUsuario(string CodigoUsuario)
+        {
+            SqlConnection cn = con.conexion();
+
+            cn.Open();
+
+            string sql = "SELECT convert(varchar(100),CodigoPaciente,103) AS CodigoPaciente " +
+                "FROM USUARIOS_PACIENTES " +
+                "WHERE CodigoUsuario=" + CodigoUsuario;
+
+            SqlCommand cmd = new SqlCommand(sql, cn);
+
+            SqlDataReader reader = cmd.ExecuteReader();
+
+            List<Paciente> lista = new List<Paciente>();
+
+            while (reader.Read())
+            {
+                lista.Add(new Paciente(reader.GetString(0)));
+            }
+
+            cn.Close();
+
+            return lista.ToArray();
+        }
+        [WebMethod]
         public int InsertarGeoPoint(
             string Latitud,
             string Longitud,

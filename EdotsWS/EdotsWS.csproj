@@ -68,6 +68,7 @@
     <Compile Include="Local.cs" />
     <Compile Include="Login.cs" />
     <Compile Include="lstId.cs" />
+    <Compile Include="Paciente.cs" />
     <Compile Include="Participante.cs" />
     <Compile Include="Proyecto.cs" />
     <Compile Include="Service1.asmx.cs">
