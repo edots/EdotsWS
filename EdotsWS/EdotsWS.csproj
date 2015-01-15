@@ -62,6 +62,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Contacto.cs" />
     <Compile Include="Idreg.cs" />
     <Compile Include="Geofence.cs" />
     <Compile Include="Conexion.cs" />

@@ -907,6 +907,99 @@ namespace EdotsWS
 
 
         }
+
+        [WebMethod]
+        public int RegistrarPacientesContactos(
+            string CodigoPaciente, 
+            String CodigoUbigeo,
+            String Direccion,
+            String Referencia,
+            String Telefono1,
+            String Telefono2,
+            String Celular)
+        {
+            SqlConnection cn = con.conexion();
+            SqlCommand cmd = new SqlCommand("SPI_PACIENTE_CONTACTO", cn);
+            SqlTransaction trx;
+            int intretorno;
+            string strRespuesta;
+
+            try
+            {
+                cn.Open();
+                trx = cn.BeginTransaction();
+                cmd.Transaction = trx;
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add(new SqlParameter("@CodigoPaciente", SqlDbType.VarChar, 50)).Value = CodigoPaciente;
+                cmd.Parameters.Add(new SqlParameter("@CodigoUbigeo", SqlDbType.VarChar, 9)).Value = CodigoUbigeo;
+                cmd.Parameters.Add(new SqlParameter("@Direccion", SqlDbType.VarChar, 1000)).Value = Direccion;
+                cmd.Parameters.Add(new SqlParameter("@Referencia", SqlDbType.VarChar, 1000)).Value = Referencia;
+                cmd.Parameters.Add(new SqlParameter("@Telefono1", SqlDbType.VarChar, 20)).Value = Telefono1;
+                cmd.Parameters.Add(new SqlParameter("@Telefono2", SqlDbType.VarChar, 20)).Value = Telefono2;
+                cmd.Parameters.Add(new SqlParameter("@Celular", SqlDbType.VarChar, 20)).Value = Celular;
+                cmd.Transaction = trx;
+                intretorno = cmd.ExecuteNonQuery();
+                trx.Commit();
+                cn.Close();
+                return intretorno;
+            }
+            catch (SqlException sqlException)
+            {
+                strRespuesta = sqlException.Message.ToString();
+                cn.Close();
+                return -1;
+            }
+            catch (Exception exception)
+            {
+                strRespuesta = exception.Message.ToString();
+                cn.Close();
+                return -1;
+            }
+
+
+        }
+
+        [WebMethod]
+        public Contacto[] ListadoPacientesContactos(string CodigoPaciente)
+        {
+            SqlConnection cn = con.conexion();
+
+            cn.Open();
+
+            string sql = "SELECT convert(varchar(100),CodigoPaciente,103) AS CodigoPaciente, " +
+                "CASE WHEN CodigoUbigeo IS NULL THEN '' ELSE CodigoUbigeo END AS CodigoUbigeo, " +
+                "CASE WHEN Direccion IS NULL THEN '' ELSE Direccion END AS Direccion, " +
+                "CASE WHEN Referencia IS NULL THEN '' ELSE Referencia END AS Referencia, " +
+                "CASE WHEN Telefono1 IS NULL THEN '' ELSE Telefono1 END AS Telefono1, " +
+                "CASE WHEN Telefono2 IS NULL THEN '' ELSE Telefono2 END AS Telefono2, " +
+                "CASE WHEN Celular IS NULL THEN '' ELSE Celular END AS Celular " +
+                "FROM PACIENTE_CONTACTO " +
+                "WHERE CodigoPaciente='" + CodigoPaciente + "'";
+
+            SqlCommand cmd = new SqlCommand(sql, cn);
+
+            SqlDataReader reader = cmd.ExecuteReader();
+
+            List<Contacto> lista = new List<Contacto>();
+
+            while (reader.Read())
+            {
+                lista.Add(new Contacto
+                    (reader.GetString(0),
+                     reader.GetString(1),
+                     reader.GetString(2),
+                     reader.GetString(3),
+                     reader.GetString(4),
+                     reader.GetString(5),
+                     reader.GetString(6)));
+            }
+
+            cn.Close();
+
+            return lista.ToArray();
+        }
+    
+    
     }
 
 }
