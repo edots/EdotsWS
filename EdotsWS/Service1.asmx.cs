@@ -868,6 +868,45 @@ namespace EdotsWS
 
             return lista.ToArray();
         }
+        [WebMethod]
+        public int RegistrarPacientesUsuarios(string CodigoPaciente, int CodigoUsuario, int Estado)
+        {
+            SqlConnection cn = con.conexion();
+            SqlCommand cmd = new SqlCommand("SPI_USUARIO_PACIENTE", cn);
+            SqlTransaction trx;
+            int intretorno;
+            string strRespuesta;
+
+            try
+            {
+                cn.Open();
+                trx = cn.BeginTransaction();
+                cmd.Transaction = trx;
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add(new SqlParameter("@CodigoPaciente", SqlDbType.VarChar, 50)).Value = CodigoPaciente;
+                cmd.Parameters.Add(new SqlParameter("@CodigoUsuario", SqlDbType.Int)).Value = CodigoUsuario;
+                cmd.Parameters.Add(new SqlParameter("@Estado", SqlDbType.Int)).Value = Estado;
+                cmd.Transaction = trx;
+                intretorno = cmd.ExecuteNonQuery();
+                trx.Commit();
+                cn.Close();
+                return intretorno;
+            }
+            catch (SqlException sqlException)
+            {
+                strRespuesta = sqlException.Message.ToString();
+                cn.Close();
+                return -1;
+            }
+            catch (Exception exception)
+            {
+                strRespuesta = exception.Message.ToString();
+                cn.Close();
+                return -1;
+            }
+
+
+        }
     }
 
 }
