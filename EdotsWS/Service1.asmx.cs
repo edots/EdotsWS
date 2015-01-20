@@ -998,7 +998,187 @@ namespace EdotsWS
 
             return lista.ToArray();
         }
-    
+        [WebMethod]
+        public Proyecto[] ListadoProyectos2()
+        {
+            SqlConnection cn = con.conexion();
+
+            cn.Open();
+
+            string sql = "SELECT p.CodigoProyecto,p.Nombre " +
+                "FROM PROYECTO AS p " +
+                "WHERE p.estado=1";
+
+            SqlCommand cmd = new SqlCommand(sql, cn);
+
+            SqlDataReader reader = cmd.ExecuteReader();
+
+            List<Proyecto> lista = new List<Proyecto>();
+
+            while (reader.Read())
+            {
+                lista.Add(new Proyecto(reader.GetInt32(0), reader.GetString(1)));
+            }
+
+            cn.Close();
+
+            return lista.ToArray();
+        }
+
+        [WebMethod]
+        public Inscripcion[] ListadoPacienteInscripcion(String CodigoPaciente)
+        {
+            SqlConnection cn = con.conexion();
+
+            cn.Open();
+
+            string sql = "SELECT convert(varchar(100),CodigoPaciente,103) AS CodigoPaciente " +
+                        ",CONVERT(varchar, ISNULL(Lunes, 0)) AS Lunes " +
+                        ",CONVERT(varchar, ISNULL(Martes, 0)) AS Martes " +
+                        ",CONVERT(varchar, ISNULL(Miercoles, 0)) AS Miercoles " +
+                        ",CONVERT(varchar, ISNULL(Jueves, 0)) AS Jueves " +
+                        ",CONVERT(varchar, ISNULL(Viernes, 0)) AS Viernes " +
+                        ",CONVERT(varchar, ISNULL(Sabado, 0)) AS Sabado " +
+                        ",CONVERT(varchar, ISNULL(Domingo, 0)) AS Domingo " +
+                        ",CONVERT(varchar(10), FechaComienzo, 103) AS FechaComienzo " +
+                        ",CONVERT(varchar(10), FechaTermino, 103) AS FechaTermino " +
+                        ",CONVERT(varchar, ISNULL(Activo, 0)) AS Activo FROM PACIENTE_INSCRIPCION " +
+                        "WHERE CodigoPaciente ='" + CodigoPaciente + "' AND Activo = 1";
+
+            SqlCommand cmd = new SqlCommand(sql, cn);
+
+            SqlDataReader reader = cmd.ExecuteReader();
+
+            List<Inscripcion> lista = new List<Inscripcion>();
+
+            while (reader.Read())
+            {
+                lista.Add(new Inscripcion(
+                    reader.GetString(0), 
+                    reader.GetString(1),
+                    reader.GetString(2), 
+                    reader.GetString(3),
+                    reader.GetString(4), 
+                    reader.GetString(5),
+                    reader.GetString(6),
+                    reader.GetString(7),
+                    reader.GetString(8),
+                    reader.GetString(9),
+                    reader.GetString(10)
+                    ));
+            }
+
+            cn.Close();
+
+            return lista.ToArray();
+        }
+
+        [WebMethod]
+        public PacCelular[] ListadoPacienteCelular(int CodigoUsuario,String Fecha)
+        {
+            SqlConnection cn = con.conexion();
+
+            cn.Open();
+
+            string sql = "SELECT convert(varchar(100),cp.CodigoPaciente,103) AS CodigoPaciente, "+
+                        "CASE WHEN c.Celular IS NULL THEN '' ELSE Celular END AS Celular FROM " +
+                        "(SELECT up.CodigoPaciente FROM " +
+                        "(SELECT CodigoPaciente FROM USUARIOS_PACIENTES WHERE CodigoUsuario = " + CodigoUsuario + ") up " +
+                        "LEFT OUTER JOIN  " +
+                        "(SELECT * FROM " +
+                        "(SELECT v.CodigoPaciente,dayofweek, pi.Domingo, pi.Lunes, pi.Martes, pi.Miercoles, pi.Jueves, pi.Viernes, pi.Sabado FROM  " +
+                        "(SELECT CodigoPaciente, datepart(dw,FechaVisita) as dayofweek FROM VISITAS WHERE FechaVisita ='" + Fecha + "') v " +
+                        "LEFT OUTER JOIN " +
+                        "(SELECT * FROM  PACIENTE_INSCRIPCION WHERE ACTIVO  = 1) pi " +
+                        "ON v.CodigoPaciente = pi.CodigoPaciente) k " +
+                        "WHERE ((dayofweek = 1 AND Domingo = 1) " +
+                        "OR (dayofweek = 2 AND Lunes=1) " +
+                        "OR (dayofweek =3 AND Martes=1) " +
+                        "OR (dayofweek =4 AND Miercoles=1) " +
+                        "OR (dayofweek =5 AND Jueves=1) " +
+                        "OR (dayofweek = 6 AND Jueves = 1) " +
+                        "OR (dayofweek = 7 AND Sabado = 1))) d " +
+                        "on up.CodigoPaciente = d.CodigoPaciente " +
+                        "WHERE dayofweek is NULL) cp  " +
+                        "LEFT OUTER JOIN " +
+                        "(SELECT * FROM PACIENTE_CONTACTO) c " +
+                        "on cp.CodigoPaciente = c.CodigoPaciente";
+            SqlCommand cmd = new SqlCommand(sql, cn);
+
+            SqlDataReader reader = cmd.ExecuteReader();
+
+            List<PacCelular> lista = new List<PacCelular>();
+
+            while (reader.Read())
+            {
+                lista.Add(new PacCelular(
+                    reader.GetString(0),
+                    reader.GetString(1)
+                    ));
+            }
+
+            cn.Close();
+
+            return lista.ToArray();
+        }
+
+        [WebMethod]
+        public int RegistrarPacientesInscripcion(
+            String CodigoPaciente,
+            String Lunes,
+            String Martes,
+            String Miercoles,
+            String Jueves,
+            String Viernes,
+            String Sabado,
+            String Domingo,
+            String FechaComienzo,
+            String FechaTermino)
+        {
+            SqlConnection cn = con.conexion();
+            SqlCommand cmd = new SqlCommand("SPI_PACIENTE_INSCRIPCION", cn);
+            SqlTransaction trx;
+            int intretorno;
+            string strRespuesta;
+
+            try
+            {
+                cn.Open();
+                trx = cn.BeginTransaction();
+                cmd.Transaction = trx;
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add(new SqlParameter("@CodigoPaciente", SqlDbType.VarChar, 50)).Value = CodigoPaciente;
+                cmd.Parameters.Add(new SqlParameter("@Lunes", SqlDbType.Bit, 1)).Value = Convert.ToBoolean(Lunes);
+                cmd.Parameters.Add(new SqlParameter("@Martes", SqlDbType.Bit, 1)).Value = Convert.ToBoolean(Martes);
+                cmd.Parameters.Add(new SqlParameter("@Miercoles", SqlDbType.Bit, 1)).Value = Convert.ToBoolean(Miercoles);
+                cmd.Parameters.Add(new SqlParameter("@Jueves", SqlDbType.Bit, 1)).Value = Convert.ToBoolean(Jueves);
+                cmd.Parameters.Add(new SqlParameter("@Viernes", SqlDbType.Bit, 1)).Value = Convert.ToBoolean(Viernes);
+                cmd.Parameters.Add(new SqlParameter("@Sabado", SqlDbType.Bit, 1)).Value = Convert.ToBoolean(Sabado);
+                cmd.Parameters.Add(new SqlParameter("@Domingo", SqlDbType.Bit, 1)).Value = Convert.ToBoolean(Domingo);
+                cmd.Parameters.Add(new SqlParameter("@FechaComienzo", SqlDbType.VarChar, 10)).Value = FechaComienzo;
+                cmd.Parameters.Add(new SqlParameter("@FechaTermino", SqlDbType.VarChar, 10)).Value = FechaTermino;
+                cmd.Transaction = trx;
+                intretorno = cmd.ExecuteNonQuery();
+                trx.Commit();
+                cn.Close();
+                return intretorno;
+            }
+            catch (SqlException sqlException)
+            {
+                strRespuesta = sqlException.Message.ToString();
+                cn.Close();
+                return -1;
+            }
+            catch (Exception exception)
+            {
+                strRespuesta = exception.Message.ToString();
+                cn.Close();
+                return -1;
+            }
+
+
+        }
+
     
     }
 
