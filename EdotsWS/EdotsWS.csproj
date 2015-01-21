@@ -62,6 +62,8 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Droga.cs" />
+    <Compile Include="Esquema.cs" />
     <Compile Include="PacCelular.cs" />
     <Compile Include="Contacto.cs" />
     <Compile Include="Idreg.cs" />

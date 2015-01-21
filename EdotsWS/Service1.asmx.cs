@@ -1179,7 +1179,199 @@ namespace EdotsWS
 
         }
 
-    
+        [WebMethod]
+        public Esquema[] ListadoPacienteEsquema(String CodigoPaciente)
+        {
+            SqlConnection cn = con.conexion();
+
+            cn.Open();
+
+            string sql = "SELECT PE.CodigoPaciente,"+
+                        "PE.CodigoEsquema,"+
+                        "PE.LunesManana,"+
+                        "PE.MartesManana,"+
+                        "PE.MiercolesManana,"+
+                        "PE.JuevesManana,"+
+                        "PE.ViernesManana,"+
+                        "PE.SabadoManana,"+
+                        "PE.DomingoManana,"+
+                        "PE.LunesTarde,"+
+                        "PE.MartesTarde,"+
+                        "PE.MiercolesTarde,"+
+                        "PE.JuevesTarde,"+
+                        "PE.ViernesTarde,"+
+                        "PE.SabadoTarde,"+
+                        "PE.DomingoTarde,"+
+                        "E.Nombre,"+ 
+                        "E.Fase "+
+                        "FROM "+
+                        "(SELECT convert(varchar(100),CodigoPaciente,103) AS CodigoPaciente "+ 
+                        ",CONVERT(varchar(10), ISNULL(CodigoEsquema, 0)) AS CodigoEsquema "+
+                        ",CONVERT(varchar, ISNULL(LunesManana, 0)) AS LunesManana "+
+                        ",CONVERT(varchar, ISNULL(MartesManana, 0)) AS MartesManana "+
+                        ",CONVERT(varchar, ISNULL(MiercolesManana, 0)) AS MiercolesManana "+ 
+                        ",CONVERT(varchar, ISNULL(JuevesManana, 0)) AS JuevesManana "+ 
+                        ",CONVERT(varchar, ISNULL(ViernesManana, 0)) AS ViernesManana "+ 
+                        ",CONVERT(varchar, ISNULL(SabadoManana, 0)) AS SabadoManana "+ 
+                        ",CONVERT(varchar, ISNULL(DomingoManana, 0)) AS DomingoManana "+ 
+                        ",CONVERT(varchar, ISNULL(LunesTarde, 0)) AS LunesTarde "+ 
+                        ",CONVERT(varchar, ISNULL(MartesTarde, 0)) AS MartesTarde "+ 
+                        ",CONVERT(varchar, ISNULL(MiercolesTarde, 0)) AS MiercolesTarde "+ 
+                        ",CONVERT(varchar, ISNULL(JuevesTarde, 0)) AS JuevesTarde "+ 
+                        ",CONVERT(varchar, ISNULL(ViernesTarde, 0)) AS ViernesTarde "+ 
+                        ",CONVERT(varchar, ISNULL(SabadoTarde, 0)) AS SabadoTarde "+ 
+                        ",CONVERT(varchar, ISNULL(DomingoTarde, 0)) AS DomingoTarde "+ 
+                        ",CONVERT(varchar(10), FechaComienzo, 103) AS FechaComienzo "+ 
+                        ",CONVERT(varchar(10), FechaTermino, 103) AS FechaTermino "+ 
+                        ",CONVERT(varchar, ISNULL(TipoDeVisita, 0)) AS TipoDeVisito "+ 
+                        ",CONVERT(varchar, ISNULL(Activo, 0)) AS Activo FROM PACIENTE_ESQUEMA "+
+                        "WHERE CodigoPaciente ='" + CodigoPaciente + "' AND Activo = 1) PE " +
+                        "INNER JOIN (SELECT  convert(varchar(100),Nombre,103) AS Nombre, "+
+                        "CONVERT(varchar, ISNULL(Fase, 0)) AS Fase, "+ 
+                        "CONVERT(varchar(10), ISNULL(CodigoEsquema, 0)) AS CodigoEsquema "+ 
+                        "FROM ESQUEMAS) E "+
+                        "ON PE.CodigoEsquema=E.CodigoEsquema";
+
+            SqlCommand cmd = new SqlCommand(sql, cn);
+
+            SqlDataReader reader = cmd.ExecuteReader();
+
+            List<Esquema> lista = new List<Esquema>();
+
+            while (reader.Read())
+            {
+                lista.Add(new Esquema(
+                    reader.GetString(0),
+                    reader.GetString(1),
+                    reader.GetString(2),
+                    reader.GetString(3),
+                    reader.GetString(4),
+                    reader.GetString(5),
+                    reader.GetString(6),
+                    reader.GetString(7),
+                    reader.GetString(8),
+                    reader.GetString(9),
+                    reader.GetString(10),
+                    reader.GetString(11),
+                    reader.GetString(12),
+                    reader.GetString(13),
+                    reader.GetString(14),
+                    reader.GetString(15),
+                    reader.GetString(16),
+                    reader.GetString(17),
+                    reader.GetString(18),
+                    reader.GetString(19),
+                    reader.GetString(20),
+                    reader.GetString(21)
+                    ));
+            }
+
+            cn.Close();
+
+            return lista.ToArray();
+        }
+
+/**
+ * list the drug information (id, name, symbol, dosage) given a schema number
+ */
+        [WebMethod]
+        public Droga[] ListadoEsquemasDrogas(string CodigoEsquema)
+        {
+            SqlConnection cn = con.conexion();
+
+            cn.Open();
+            string sql = "SELECT dr.CodigoDroga, Farmacos, Siglas, DosisMaxima " +
+                            "FROM ESQUEMAS_DROGAS AS ed " + 
+                            "INNER JOIN DROGAS AS dr " +
+                            "ON ed.CodigoDroga = dr.CodigoDroga " +
+                            "WHERE CodigoEsquema = '" + CodigoEsquema + "'";
+
+            SqlCommand cmd = new SqlCommand(sql, cn);
+
+            SqlDataReader reader = cmd.ExecuteReader();
+
+            List<Droga> lista = new List<Droga>();
+
+            while (reader.Read())
+            {
+                lista.Add(new Droga(
+                    reader.GetInt32(0), 
+                    reader.GetString(1),
+                    reader.GetString(2),
+                    reader.GetString(3)
+                    ));
+            }
+
+            cn.Close();
+
+            return lista.ToArray();
+        }
+
+/**
+ * insert a patient schema into the data base
+ */
+        [WebMethod]
+        public int InsertarPacienteEsquema(string CodigoPaciente, string CodigoEsquema,
+            string LunesManana, string MartesManana,
+            string MiercolesManana, string JuevesManana, 
+            string ViernesManana, string SabadoManana,
+            string DomingoManana, string LunesTarde,
+            string MartesTarde, string MiercolesTarde,
+            string JuevesTarde, string ViernesTarde,
+            string SabadoTarde, string DomingoTarde,
+            string FechaComienzo, string FechaTermino, string TipoDeVisita)
+        {
+            SqlConnection cn = con.conexion();
+            SqlCommand cmd = new SqlCommand("SPI_PACIENTE_ESQUEMA", cn);
+            SqlTransaction trx;
+            int intretorno;
+            string strRespuesta;
+
+            try
+            {
+                cn.Open();
+                trx = cn.BeginTransaction();
+                cmd.Transaction = trx;
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add(new SqlParameter("@CodigoPaciente", SqlDbType.VarChar,256)).Value = CodigoPaciente;
+                cmd.Parameters.Add(new SqlParameter("@CodigoEsquema", SqlDbType.Int)).Value = CodigoEsquema;
+                cmd.Parameters.Add(new SqlParameter("@LunesManana", SqlDbType.Bit)).Value = LunesManana;
+                cmd.Parameters.Add(new SqlParameter("@MartesManana", SqlDbType.Bit)).Value = MartesManana;
+                cmd.Parameters.Add(new SqlParameter("@MiercolesManana", SqlDbType.Bit)).Value = MiercolesManana;
+                cmd.Parameters.Add(new SqlParameter("@JuevesManana", SqlDbType.Bit)).Value = JuevesManana;
+                cmd.Parameters.Add(new SqlParameter("@ViernesManana", SqlDbType.Bit)).Value = ViernesManana;
+                cmd.Parameters.Add(new SqlParameter("@SabadoManana", SqlDbType.Bit)).Value = SabadoManana;
+                cmd.Parameters.Add(new SqlParameter("@DomingoManana", SqlDbType.Bit)).Value = DomingoManana;
+                cmd.Parameters.Add(new SqlParameter("@LunesTarde", SqlDbType.Bit)).Value = LunesTarde;
+                cmd.Parameters.Add(new SqlParameter("@MartesTarde", SqlDbType.Bit)).Value = MartesTarde;
+                cmd.Parameters.Add(new SqlParameter("@MiercolesTarde", SqlDbType.Bit)).Value = MiercolesTarde;
+                cmd.Parameters.Add(new SqlParameter("@JuevesTarde", SqlDbType.Bit)).Value = JuevesTarde;
+                cmd.Parameters.Add(new SqlParameter("@ViernesTarde", SqlDbType.Bit)).Value = ViernesTarde;
+                cmd.Parameters.Add(new SqlParameter("@SabadoTarde", SqlDbType.Bit)).Value = SabadoTarde;
+                cmd.Parameters.Add(new SqlParameter("@DomingoTarde", SqlDbType.Bit)).Value = DomingoTarde;
+                cmd.Parameters.Add(new SqlParameter("@FechaComienzo", SqlDbType.VarChar, 10)).Value = FechaComienzo;
+                cmd.Parameters.Add(new SqlParameter("@FechaTermino", SqlDbType.VarChar, 10)).Value = FechaTermino;
+                cmd.Parameters.Add(new SqlParameter("@TipoDeVisita", SqlDbType.Bit)).Value = TipoDeVisita;
+
+                cmd.Transaction = trx;
+                intretorno = cmd.ExecuteNonQuery();
+                trx.Commit();
+                cn.Close();
+                return intretorno;
+            }
+            catch (SqlException sqlException)
+            {
+                strRespuesta = sqlException.Message.ToString();
+                cn.Close();
+                return -1;
+            }
+            catch (Exception exception)
+            {
+                strRespuesta = exception.Message.ToString();
+                cn.Close();
+                return -2;
+            }
+        }   
     }
 
 }
