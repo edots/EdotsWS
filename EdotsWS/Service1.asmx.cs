@@ -1202,6 +1202,10 @@ namespace EdotsWS
                         "PE.ViernesTarde,"+
                         "PE.SabadoTarde,"+
                         "PE.DomingoTarde,"+
+                        "PE.FechaComienzo," +
+                        "PE.FechaTermino," +
+                        "PE.Activo," +
+                        "PE.TipoDeVisita," +
                         "E.Nombre,"+ 
                         "E.Fase "+
                         "FROM "+
@@ -1223,7 +1227,7 @@ namespace EdotsWS
                         ",CONVERT(varchar, ISNULL(DomingoTarde, 0)) AS DomingoTarde "+ 
                         ",CONVERT(varchar(10), FechaComienzo, 103) AS FechaComienzo "+ 
                         ",CONVERT(varchar(10), FechaTermino, 103) AS FechaTermino "+ 
-                        ",CONVERT(varchar, ISNULL(TipoDeVisita, 0)) AS TipoDeVisito "+ 
+                        ",CONVERT(varchar, ISNULL(TipoDeVisita, 0)) AS TipoDeVisita "+ 
                         ",CONVERT(varchar, ISNULL(Activo, 0)) AS Activo FROM PACIENTE_ESQUEMA "+
                         "WHERE CodigoPaciente ='" + CodigoPaciente + "' AND Activo = 1) PE " +
                         "INNER JOIN (SELECT  convert(varchar(100),Nombre,103) AS Nombre, "+
@@ -1371,7 +1375,51 @@ namespace EdotsWS
                 cn.Close();
                 return -2;
             }
-        }   
+        } 
+  
+        [WebMethod]
+        public VisitaDia[] ListadoVisitasDias(string CodigoPaciente,string FechaComienzo,string FechaTermino)
+        {
+            SqlConnection cn = con.conexion();
+            cn.Open();
+            string sql = "SELECT CONVERT(varchar(10), Dia, 103) AS Dia " +
+                        ", COALESCE(CodigoPaciente, '" + CodigoPaciente + "') AS CodigoPaciente " +
+                        ", CONVERT(VARCHAR,COALESCE(Morning,0)) AS Manana "  +
+                        ", CONVERT(VARCHAR, COALESCE(Afternoon,0)) AS Tarde FROM " +
+                        "(SELECT Dia FROM DIAS  WHERE Dia BETWEEN '" + FechaComienzo + "' AND '" + FechaTermino + "') D " +
+                        "LEFT OUTER JOIN " +
+                        "(SELECT CodigoPaciente " +
+                        ", FechaVisita " +
+                        ", CASE WHEN min_hour < '12:00:00.0000000' THEN 1 ELSE 0 END As Morning " +
+                        ", CASE WHEN max_hour > '12:00:00.0000000'  THEN 1 ElSE 0 END as Afternoon " +
+                        "FROM " +
+                        "(SELECT CodigoPaciente, FechaVisita, MIN(HoraInicio) AS min_hour, " +
+                        "MAX(HoraInicio) AS max_hour FROM " +
+                        "(SELECT * FROM " +
+                        " VISITAS WHERE CodigoPaciente = '" + CodigoPaciente +
+                        "' AND (FechaVisita BETWEEN '" + FechaComienzo + "' AND '" + FechaTermino + "')) D " +
+                        "GROUP BY  CodigoPaciente, FechaVisita) E) P " +
+                        "ON D.Dia = P.FechaVisita";
+            SqlCommand cmd = new SqlCommand(sql, cn);
+
+            SqlDataReader reader = cmd.ExecuteReader();
+
+            List<VisitaDia> lista = new List<VisitaDia>();
+
+            while (reader.Read())
+            {
+                lista.Add(new VisitaDia(
+                    reader.GetString(0),
+                    reader.GetString(1),
+                    reader.GetString(2),
+                    reader.GetString(3)));
+            }
+
+            cn.Close();
+            return lista.ToArray();
+        }
+
+    
     }
 
 }

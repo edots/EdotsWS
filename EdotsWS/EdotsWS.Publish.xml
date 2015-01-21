@@ -7,8 +7,8 @@
     <file relUrl="Web.config" publishTime="01/06/2015 15:52:41" />
   </publishProfile>
   <publishProfile publishUrl="ftp://192.168.1.26/EdotsWS" deleteExistingFiles="False" ftpAnonymousLogin="False" ftpPassiveMode="True" msdeploySite="" msdeploySiteID="" msdeployRemoteSitePhysicalPath="" msdeployAllowUntrustedCertificate="False" msdeploySkipExtraFilesOnServer="True" msdeployMarkAsApp="False" profileName="FTP_EdotsWS" publishMethod="FTP" replaceMatchingFiles="True" userName="jtomaylla" savePWD="True" userPWD="AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAnSeh8KOW8UW8hP6iocGurQAAAAACAAAAAAAQZgAAAAEAACAAAAD838cI7ByJwIxAmORrE3XB415u13zfAFfVWZ+EbHvT+AAAAAAOgAAAAAIAACAAAACNNRW40hzflwXl7i5y5vU/uvJa1lMwePJfG46W57mzYSAAAAD8Ik6uMsKQt0wDpp3zSEBCrhBy+geb2fpBlFpacghYYUAAAAA1qFrJ/qa+1uYPeIPQs1iT9Hu3Udxa1Yp+OU7wGChd9VConByuYSiWrhgoUQBRQZi91P1xFTXgUjKWMMAMpin8" SelectedForPublish="True">
-    <file relUrl="bin/EdotsWS.pdb" publishTime="01/21/2015 15:02:48" />
-    <file relUrl="bin/EdotsWS.dll" publishTime="01/21/2015 15:02:48" />
+    <file relUrl="bin/EdotsWS.pdb" publishTime="01/21/2015 16:34:32" />
+    <file relUrl="bin/EdotsWS.dll" publishTime="01/21/2015 16:34:32" />
     <file relUrl="Service1.asmx" publishTime="01/06/2015 09:10:48" />
     <file relUrl="Web.config" publishTime="01/06/2015 15:52:41" />
   </publishProfile>

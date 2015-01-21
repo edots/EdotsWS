@@ -82,6 +82,7 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Visita.cs" />
+    <Compile Include="VisitaDia.cs" />
     <Compile Include="Visitas.cs" />
     <Compile Include="Visitas1.cs" />
   </ItemGroup>
